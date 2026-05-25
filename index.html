@@ -10,32 +10,119 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
-    :root {
-      --blue: #3b82f6; --blue-dim: #1e3a5f; --blue-bg: #0f2035;
-      --green: #22c55e; --green-dim: #14532d; --green-bg: #052e16;
-      --purple: #a855f7; --purple-dim: #4c1d95; --purple-bg: #2e1065;
-      --amber: #f59e0b; --amber-dim: #78350f; --amber-bg: #1c0f00;
-      --red: #ef4444; --red-dim: #7f1d1d; --red-bg: #1f0000;
-      --card: #1e293b; --card2: #263548; --border: #334155; --muted: #64748b;
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a; color: #e2e8f0; min-height: 100vh;
     }
+
+    /* ── Slider track ── */
     input[type=range] {
-      -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px;
+      -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px;
       background: #334155; outline: none; cursor: pointer;
     }
     input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+      -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
       background: currentColor; cursor: pointer; transition: transform 0.1s;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.3);
     }
-    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-    .scrollbar::-webkit-scrollbar { width: 4px; }
-    .scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
-    .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
-    .badge-fixed { background: #1e293b; color: #64748b; border: 1px solid #334155; }
-    .badge-var { background: #1c2a1c; color: #4ade80; border: 1px solid #166534; }
-    .badge-temp { background: #2a1c00; color: #fbbf24; border: 1px solid #78350f; }
+    input[type=range]:active::-webkit-slider-thumb { transform: scale(1.25); }
+
+    /* ── Number input ── */
+    .amount-input {
+      background: #0f172a; border: 1px solid #475569; border-radius: 8px;
+      display: flex; align-items: center; gap: 2px; padding: 4px 8px;
+      transition: border-color 0.15s;
+    }
+    .amount-input:focus-within { border-color: #3b82f6; }
+    .amount-input span { color: #64748b; font-size: 13px; font-weight: 600; }
+    .amount-input input {
+      background: transparent; border: none; outline: none;
+      color: #f1f5f9; font-size: 15px; font-weight: 700;
+      width: 64px; text-align: right;
+      -moz-appearance: textfield;
+    }
+    .amount-input input::-webkit-inner-spin-button,
+    .amount-input input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    /* ── Pills ── */
+    .pill {
+      display: inline-block; padding: 2px 7px; border-radius: 999px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .badge-fixed  { background: #1e293b; color: #64748b;  border: 1px solid #334155; }
+    .badge-var    { background: #1c2a1c; color: #4ade80;  border: 1px solid #166534; }
+    .badge-temp   { background: #2a1c00; color: #fbbf24;  border: 1px solid #78350f; }
+
     canvas { max-width: 100%; }
+
+    /* ── Sticky top bar (mobile) ── */
+    .sticky-bar {
+      position: sticky; top: 0; z-index: 50;
+      background: #0f172a; border-bottom: 1px solid #1e293b;
+      padding: 10px 16px;
+      display: none;           /* hidden on desktop */
+      justify-content: space-around; align-items: center;
+    }
+    .sticky-bar-item { text-align: center; }
+    .sticky-bar-item .sb-label { font-size: 10px; color: #64748b; }
+    .sticky-bar-item .sb-value { font-size: 18px; font-weight: 800; }
+
+    /* ── Summary cards ── */
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px; margin-bottom: 20px;
+    }
+
+    /* ── Main 2-col layout ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 16px; align-items: start;
+    }
+    .sidebar { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 16px; }
+
+    /* ── Scenario buttons ── */
+    .scenario-row {
+      display: flex; justify-content: center; gap: 8px;
+      margin-bottom: 20px; flex-wrap: wrap;
+    }
+
+    /* ════════════════════════════
+       MOBILE  (≤ 700px)
+    ════════════════════════════ */
+    @media (max-width: 700px) {
+
+      .sticky-bar { display: flex; }
+
+      .page-header { padding: 16px 0 10px; }
+      .page-header h1 { font-size: 20px; }
+      .page-header p  { font-size: 12px; }
+
+      .scenario-row { gap: 6px; margin-bottom: 14px; }
+      .scenario-btn { font-size: 11px !important; padding: 6px 10px !important; }
+
+      .summary-cards { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+      .summary-card .card-value { font-size: 18px !important; }
+      .summary-card .card-label { font-size: 10px !important; }
+      .summary-card .card-icon  { font-size: 16px !important; }
+
+      .main-grid { grid-template-columns: 1fr; }
+      .sidebar   { position: static; }
+
+      /* Larger touch slider thumb on mobile */
+      input[type=range] { height: 8px; }
+      input[type=range]::-webkit-slider-thumb { width: 28px; height: 28px; }
+
+      /* Amount input wider on mobile */
+      .amount-input input { width: 70px; font-size: 16px; }
+    }
+
+    @media (max-width: 400px) {
+      .summary-cards { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -44,53 +131,53 @@
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
 
-// ─── Data ────────────────────────────────────────────────────────────────────
+/* ─── Data ─────────────────────────────────────────────────────────────────── */
 const BASE = {
   income: [
-    { id:'wayneSalary',   label:"Husband's Salary",    value:3000,   min:2000, max:5000,  fixed:false, color:'green' },
-    { id:'wifeSalary',    label:"Wife's Salary",        value:1700,   min:1000, max:3000,  fixed:false, color:'green' },
-    { id:'rental',        label:"Rental Income",        value:1050,   min:700,  max:1400,  fixed:false, color:'green' },
-    { id:'mgmtFee',       label:"Management Fee (−)",   value:153,    min:100,  max:200,   fixed:false, color:'red', subtract:true },
+    { id:'wayneSalary', label:"Husband's Salary",    value:3000,   min:2000, max:5000, fixed:false, color:'green' },
+    { id:'wifeSalary',  label:"Wife's Salary",        value:1700,   min:1000, max:3000, fixed:false, color:'green' },
+    { id:'rental',      label:"Rental Income",        value:1050,   min:700,  max:1400, fixed:false, color:'green' },
+    { id:'mgmtFee',     label:"Management Fee (−)",   value:153,    min:100,  max:200,  fixed:false, color:'red', subtract:true },
   ],
   shared: [
-    { id:'ck_mortgage',   label:"Carter Knowle Mortgage",     value:1825.93, min:1600, max:2100, fixed:true  },
-    { id:'tc_mortgage',   label:"Tristan Court Remortgage",   value:141.33,  min:100,  max:200,  fixed:true  },
-    { id:'stannington',   label:"Rent – Stannington",          value:850,     min:0,    max:1200, fixed:false, temp:true },
-    { id:'council_ck',    label:"Council Tax (Carter Knowle)", value:139,     min:100,  max:250,  fixed:false },
-    { id:'council_st',    label:"Council Tax (Stannington)",   value:159,    min:100,  max:250,  fixed:false, temp:true },
-    { id:'water',         label:"Water",                      value:69,      min:30,   max:150,  fixed:false },
-    { id:'energy',        label:"Energy",                     value:103.98,  min:50,   max:250,  fixed:false },
-    { id:'broadband',     label:"Broadband",                  value:31,      min:20,   max:60,   fixed:false },
-    { id:'groceries',     label:"Food & Groceries",           value:500,     min:200,  max:900,  fixed:false },
-    { id:'household',     label:"Household Items",            value:120,     min:0,    max:400,  fixed:false },
+    { id:'ck_mortgage', label:"Carter Knowle Mortgage",      value:1825.93, min:1600, max:2100, fixed:true  },
+    { id:'tc_mortgage', label:"Tristan Court Remortgage",    value:141.33,  min:100,  max:200,  fixed:true  },
+    { id:'stannington', label:"Rent – Stannington",          value:850,     min:0,    max:1200, fixed:false, temp:true },
+    { id:'council_ck',  label:"Council Tax (Carter Knowle)", value:139,     min:100,  max:250,  fixed:false },
+    { id:'council_st',  label:"Council Tax (Stannington)",   value:159,     min:0,    max:250,  fixed:false, temp:true },
+    { id:'water',       label:"Water",                       value:69,      min:30,   max:150,  fixed:false },
+    { id:'energy',      label:"Energy",                      value:103.98,  min:50,   max:250,  fixed:false },
+    { id:'broadband',   label:"Broadband",                   value:31,      min:20,   max:60,   fixed:false },
+    { id:'groceries',   label:"Food & Groceries",            value:500,     min:200,  max:900,  fixed:false },
+    { id:'household',   label:"Household Items",             value:120,     min:0,    max:400,  fixed:false },
   ],
   wayne: [
-    { id:'w_nhs',         label:"NHS Prepayment",      value:11.45,  min:0,   max:30,   fixed:true  },
-    { id:'w_chatgpt',     label:"ChatGPT",             value:18,     min:0,   max:40,   fixed:false },
-    { id:'w_claude',      label:"Claude",              value:18,     min:0,   max:40,   fixed:false },
-    { id:'w_google',      label:"Google One",          value:10,     min:0,   max:25,   fixed:false },
-    { id:'w_apple',       label:"Apple",               value:12,     min:0,   max:25,   fixed:false },
-    { id:'w_preply',      label:"Preply (Japanese)",   value:37,     min:0,   max:100,  fixed:false },
-    { id:'w_ps',          label:"PlayStation",         value:6.99,   min:0,   max:20,   fixed:false },
-    { id:'w_westfield',   label:"Westfield",           value:38.24,  min:0,   max:150,  fixed:false },
-    { id:'w_life',        label:"Life Insurance",      value:17.09,  min:10,  max:30,   fixed:true  },
-    { id:'w_car',         label:"Car Insurance",       value:118.22, min:80,  max:180,  fixed:true  },
-    { id:'w_veh',         label:"Vehicle Tax",         value:15.75,  min:10,  max:25,   fixed:true  },
-    { id:'w_fuel',        label:"Fuel",                value:120,    min:40,  max:300,  fixed:false },
-    { id:'w_amazon',      label:"Amazon",              value:130,    min:0,   max:400,  fixed:false },
-    { id:'w_cafes',       label:"Cafés & Eating Out",  value:120,    min:0,   max:300,  fixed:false },
-    { id:'w_ai',          label:"AI / API Usage",      value:30,     min:0,   max:150,  fixed:false },
-    { id:'w_personal',    label:"Personal Spending",   value:100,    min:0,   max:400,  fixed:false },
+    { id:'w_nhs',       label:"NHS Prepayment",      value:11.45,  min:0,  max:30,  fixed:true  },
+    { id:'w_chatgpt',   label:"ChatGPT",             value:18,     min:0,  max:40,  fixed:false },
+    { id:'w_claude',    label:"Claude",              value:18,     min:0,  max:40,  fixed:false },
+    { id:'w_google',    label:"Google One",          value:10,     min:0,  max:25,  fixed:false },
+    { id:'w_apple',     label:"Apple",               value:12,     min:0,  max:25,  fixed:false },
+    { id:'w_preply',    label:"Preply (Japanese)",   value:37,     min:0,  max:100, fixed:false },
+    { id:'w_ps',        label:"PlayStation",         value:6.99,   min:0,  max:20,  fixed:false },
+    { id:'w_westfield', label:"Westfield",           value:38.24,  min:0,  max:150, fixed:false },
+    { id:'w_life',      label:"Life Insurance",      value:17.09,  min:10, max:30,  fixed:true  },
+    { id:'w_car',       label:"Car Insurance",       value:118.22, min:80, max:180, fixed:true  },
+    { id:'w_veh',       label:"Vehicle Tax",         value:15.75,  min:10, max:25,  fixed:true  },
+    { id:'w_fuel',      label:"Fuel",                value:120,    min:40, max:300, fixed:false },
+    { id:'w_amazon',    label:"Amazon",              value:130,    min:0,  max:400, fixed:false },
+    { id:'w_cafes',     label:"Cafés & Eating Out",  value:120,    min:0,  max:300, fixed:false },
+    { id:'w_ai',        label:"AI / API Usage",      value:30,     min:0,  max:150, fixed:false },
+    { id:'w_personal',  label:"Personal Spending",   value:100,    min:0,  max:400, fixed:false },
   ],
   wife: [
-    { id:'f_westfield',   label:"Westfield",           value:33.11,  min:0,   max:120,  fixed:false },
-    { id:'f_car',         label:"Car Insurance",       value:135.68, min:80,  max:200,  fixed:true  },
-    { id:'f_veh',         label:"Vehicle Tax",         value:17.50,  min:10,  max:30,   fixed:true  },
-    { id:'f_pet',         label:"Pet Insurance",       value:14.22,  min:0,   max:30,   fixed:true  },
-    { id:'f_pethealth',   label:"Pet Health Club",     value:16.50,  min:0,   max:30,   fixed:true  },
-    { id:'f_fuel',        label:"Fuel",                value:100,    min:30,  max:250,  fixed:false },
-    { id:'f_personal',    label:"Personal Spending",   value:100,    min:0,   max:400,  fixed:false },
-    { id:'f_restaurants', label:"Restaurants / Coffee",value:80,     min:0,   max:250,  fixed:false },
+    { id:'f_westfield',   label:"Westfield",            value:33.11,  min:0,  max:120, fixed:false },
+    { id:'f_car',         label:"Car Insurance",        value:135.68, min:80, max:200, fixed:true  },
+    { id:'f_veh',         label:"Vehicle Tax",          value:17.50,  min:10, max:30,  fixed:true  },
+    { id:'f_pet',         label:"Pet Insurance",        value:14.22,  min:0,  max:30,  fixed:true  },
+    { id:'f_pethealth',   label:"Pet Health Club",      value:16.50,  min:0,  max:30,  fixed:true  },
+    { id:'f_fuel',        label:"Fuel",                 value:100,    min:30, max:250, fixed:false },
+    { id:'f_personal',    label:"Personal Spending",    value:100,    min:0,  max:400, fixed:false },
+    { id:'f_restaurants', label:"Restaurants / Coffee", value:80,     min:0,  max:250, fixed:false },
   ],
 };
 
@@ -100,42 +187,79 @@ function initValues(base) {
   return v;
 }
 
-// ─── Slider Item ──────────────────────────────────────────────────────────────
+/* ─── SliderItem ─────────────────────────────────────────────────────────────
+   Each row: label + badge | diff chip | £ input   (full width)
+             slider track
+             min label                           max label
+*/
 function SliderItem({ item, value, onChange, accentColor }) {
-  const diff = value - item.value;
-  const pct = ((value - item.min) / (item.max - item.min)) * 100;
-  const trackStyle = {
-    background: `linear-gradient(to right, ${accentColor} ${pct}%, #334155 ${pct}%)`
+  const [draft, setDraft] = useState(String(Math.round(value)));
+
+  // Keep draft in sync when value is changed externally (scenario buttons, reset)
+  useEffect(() => { setDraft(String(Math.round(value))); }, [value]);
+
+  const commit = (raw) => {
+    const num = parseFloat(raw);
+    if (!isNaN(num)) {
+      const clamped = Math.min(item.max, Math.max(item.min, num));
+      onChange(item.id, clamped);
+      setDraft(String(Math.round(clamped)));
+    } else {
+      setDraft(String(Math.round(value)));
+    }
   };
 
+  const pct = ((value - item.min) / (item.max - item.min)) * 100;
+  const trackBg = `linear-gradient(to right, ${accentColor} ${pct}%, #334155 ${pct}%)`;
+  const diff = value - item.value;
+
   return (
-    <div style={{ padding:'10px 0', borderBottom:'1px solid #1e293b' }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-          <span style={{ fontSize:13, color:'#cbd5e1' }}>{item.label}</span>
+    <div style={{ padding:'12px 0', borderBottom:'1px solid #1e293b' }}>
+
+      {/* Row 1: label + input */}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:8, marginBottom:10 }}>
+
+        {/* Label + badge */}
+        <div style={{ display:'flex', alignItems:'center', gap:5, flexWrap:'wrap', flex:1, minWidth:0 }}>
+          <span style={{ fontSize:13, color:'#cbd5e1', lineHeight:1.3 }}>{item.label}</span>
           {item.fixed && <span className="pill badge-fixed">fixed</span>}
-          {item.temp  && <span className="pill badge-temp">temporary</span>}
+          {item.temp  && <span className="pill badge-temp">temp</span>}
           {!item.fixed && !item.temp && <span className="pill badge-var">variable</span>}
         </div>
-        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+
+        {/* Diff chip + £ input */}
+        <div style={{ display:'flex', alignItems:'center', gap:6, flexShrink:0 }}>
           {diff !== 0 && (
-            <span style={{ fontSize:11, color: diff > 0 ? '#ef4444' : '#22c55e' }}>
-              {diff > 0 ? '+' : ''}£{diff.toFixed(0)}
+            <span style={{ fontSize:11, color: diff > 0 ? '#ef4444' : '#22c55e', fontWeight:600 }}>
+              {diff > 0 ? '+' : '−'}£{Math.abs(diff).toFixed(0)}
             </span>
           )}
-          <span style={{ fontSize:14, fontWeight:600, color:'#f1f5f9', minWidth:56, textAlign:'right' }}>
-            £{value.toFixed(0)}
-          </span>
+          <div className="amount-input">
+            <span>£</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+              onBlur={e  => commit(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); }}
+            />
+          </div>
         </div>
       </div>
+
+      {/* Row 2: slider */}
       <input
         type="range"
-        min={item.min} max={item.max} step={item.id === 'stannington' ? 50 : 1}
+        min={item.min} max={item.max}
+        step={item.id === 'stannington' || item.id === 'council_st' ? 10 : 1}
         value={value}
-        style={{ ...trackStyle, color: accentColor }}
+        style={{ background: trackBg, color: accentColor }}
         onChange={e => onChange(item.id, +e.target.value)}
       />
-      <div style={{ display:'flex', justifyContent:'space-between', marginTop:2 }}>
+
+      {/* Row 3: min / max labels */}
+      <div style={{ display:'flex', justifyContent:'space-between', marginTop:3 }}>
         <span style={{ fontSize:10, color:'#475569' }}>£{item.min}</span>
         <span style={{ fontSize:10, color:'#475569' }}>£{item.max}</span>
       </div>
@@ -143,23 +267,22 @@ function SliderItem({ item, value, onChange, accentColor }) {
   );
 }
 
-// ─── Section ──────────────────────────────────────────────────────────────────
+/* ─── Section ────────────────────────────────────────────────────────────── */
 function Section({ title, icon, items, values, onChangeValues, color, total, baseTotal }) {
   const [open, setOpen] = useState(true);
-  const diff = total - baseTotal;
   const colorMap = { blue:'#3b82f6', green:'#22c55e', purple:'#a855f7', amber:'#f59e0b' };
-  const bgMap  = { blue:'#0f2035', green:'#052e16', purple:'#2e1065', amber:'#1c0f00' };
+  const bgMap    = { blue:'#0f2035', green:'#052e16', purple:'#2e1065', amber:'#1c0f00' };
   const acc = colorMap[color] || '#3b82f6';
-  const bg  = bgMap[color]  || '#0f2035';
+  const bg  = bgMap[color]   || '#0f2035';
+  const diff = total - baseTotal;
 
   return (
-    <div style={{ background:'#1e293b', borderRadius:12, overflow:'hidden', border:`1px solid #334155` }}>
+    <div style={{ background:'#1e293b', borderRadius:12, overflow:'hidden', border:'1px solid #334155' }}>
       <button
         onClick={() => setOpen(o => !o)}
-        style={{
-          width:'100%', display:'flex', justifyContent:'space-between', alignItems:'center',
-          padding:'14px 16px', background: bg, border:'none', cursor:'pointer', color:'#f1f5f9'
-        }}
+        style={{ width:'100%', display:'flex', justifyContent:'space-between', alignItems:'center',
+          padding:'14px 16px', background:bg, border:'none', cursor:'pointer', color:'#f1f5f9',
+          WebkitTapHighlightColor:'transparent' }}
       >
         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
           <span style={{ fontSize:18 }}>{icon}</span>
@@ -167,24 +290,19 @@ function Section({ title, icon, items, values, onChangeValues, color, total, bas
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
           {diff !== 0 && (
-            <span style={{ fontSize:12, color: diff > 0 ? '#ef4444' : '#22c55e', fontWeight:600 }}>
-              {diff > 0 ? '+' : ''}£{diff.toFixed(0)}/mo
+            <span style={{ fontSize:12, fontWeight:600, color: diff > 0 ? '#ef4444' : '#22c55e' }}>
+              {diff > 0 ? '+' : '−'}£{Math.abs(diff).toFixed(0)}
             </span>
           )}
-          <span style={{ fontWeight:800, fontSize:16, color: acc }}>£{total.toFixed(0)}</span>
-          <span style={{ color:'#64748b', fontSize:12 }}>{open ? '▲' : '▼'}</span>
+          <span style={{ fontWeight:800, fontSize:16, color:acc }}>£{total.toFixed(0)}</span>
+          <span style={{ color:'#64748b', fontSize:11, marginLeft:2 }}>{open ? '▲' : '▼'}</span>
         </div>
       </button>
       {open && (
-        <div style={{ padding:'0 16px 8px' }}>
+        <div style={{ padding:'0 16px 4px' }}>
           {items.map(item => (
-            <SliderItem
-              key={item.id}
-              item={item}
-              value={values[item.id]}
-              onChange={onChangeValues}
-              accentColor={acc}
-            />
+            <SliderItem key={item.id} item={item}
+              value={values[item.id]} onChange={onChangeValues} accentColor={acc} />
           ))}
         </div>
       )}
@@ -192,11 +310,10 @@ function Section({ title, icon, items, values, onChangeValues, color, total, bas
   );
 }
 
-// ─── Donut Chart ──────────────────────────────────────────────────────────────
+/* ─── Donut Chart ────────────────────────────────────────────────────────── */
 function DonutChart({ data }) {
-  const ref = useRef(null);
+  const ref      = useRef(null);
   const chartRef = useRef(null);
-
   useEffect(() => {
     if (!ref.current) return;
     if (chartRef.current) chartRef.current.destroy();
@@ -204,43 +321,34 @@ function DonutChart({ data }) {
       type: 'doughnut',
       data: {
         labels: data.map(d => d.label),
-        datasets: [{
-          data: data.map(d => d.value),
+        datasets: [{ data: data.map(d => d.value),
           backgroundColor: data.map(d => d.color),
-          borderColor: '#0f172a',
-          borderWidth: 3,
-          hoverOffset: 8,
-        }]
+          borderColor: '#0f172a', borderWidth: 3, hoverOffset: 8 }]
       },
       options: {
         cutout: '68%',
         plugins: {
           legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: ctx => ` £${ctx.parsed.toFixed(0)} (${((ctx.parsed / data.reduce((a,b)=>a+b.value,0))*100).toFixed(1)}%)`
-            }
-          }
+          tooltip: { callbacks: {
+            label: ctx => ` £${ctx.parsed.toFixed(0)} (${((ctx.parsed/data.reduce((a,b)=>a+b.value,0))*100).toFixed(1)}%)`
+          }}
         },
-        animation: { duration: 400 }
+        animation: { duration: 300 }
       }
     });
     return () => { if (chartRef.current) chartRef.current.destroy(); };
   }, [JSON.stringify(data)]);
-
   return <canvas ref={ref} />;
 }
 
-// ─── Bar gauge ────────────────────────────────────────────────────────────────
+/* ─── Bar Gauge ──────────────────────────────────────────────────────────── */
 function BarGauge({ label, value, max, color, subtitle }) {
-  const pct = Math.min(100, (value / max) * 100);
+  const pct = Math.min(100, Math.max(0, (value / max) * 100));
   return (
     <div>
-      <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5 }}>
         <span style={{ fontSize:12, color:'#94a3b8' }}>{label}</span>
-        <div style={{ textAlign:'right' }}>
-          <span style={{ fontSize:14, fontWeight:700, color }}>{subtitle}</span>
-        </div>
+        <span style={{ fontSize:13, fontWeight:700, color }}>{subtitle}</span>
       </div>
       <div style={{ background:'#334155', borderRadius:4, height:8, overflow:'hidden' }}>
         <div style={{ width:`${pct}%`, height:'100%', background:color, borderRadius:4, transition:'width 0.3s' }} />
@@ -249,268 +357,265 @@ function BarGauge({ label, value, max, color, subtitle }) {
   );
 }
 
-// ─── Scenario Badge ───────────────────────────────────────────────────────────
-function ScenarioBadge({ label, active, onClick }) {
+/* ─── Scenario Button ────────────────────────────────────────────────────── */
+function ScenBtn({ label, active, onClick }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        padding:'6px 14px', borderRadius:999, fontSize:12, fontWeight:600, cursor:'pointer', border:'none',
-        background: active ? '#3b82f6' : '#1e293b',
-        color: active ? '#fff' : '#64748b',
-        transition:'all 0.2s'
-      }}
-    >{label}</button>
+    <button className="scenario-btn" onClick={onClick} style={{
+      padding:'7px 14px', borderRadius:999, fontSize:12, fontWeight:600,
+      cursor:'pointer', border: active ? 'none' : '1px solid #475569',
+      background: active ? '#3b82f6' : 'transparent',
+      color: active ? '#fff' : '#94a3b8',
+      WebkitTapHighlightColor:'transparent', transition:'all 0.2s'
+    }}>{label}</button>
   );
 }
 
-// ─── Main App ─────────────────────────────────────────────────────────────────
+/* ─── App ────────────────────────────────────────────────────────────────── */
 function App() {
-  const [values, setValues] = useState(initValues(BASE));
+  const [values,   setValues]   = useState(initValues(BASE));
   const [scenario, setScenario] = useState('current');
 
-  const handleChange = useCallback((id, val) => {
-    setValues(v => ({ ...v, [id]: val }));
-  }, []);
+  const handleChange = useCallback((id, val) => setValues(v => ({ ...v, [id]: val })), []);
 
-  const handleReset = () => {
-    setValues(initValues(BASE));
-    setScenario('current');
-  };
+  const handleReset = () => { setValues(initValues(BASE)); setScenario('current'); };
 
-  const applyScenario = (s) => {
+  const applyScenario = s => {
     setScenario(s);
-    if (s === 'post') {
-      setValues(v => ({ ...v, stannington: 0 }));
-    } else {
-      setValues(v => ({ ...v, stannington: 850 }));
-    }
+    if (s === 'post') setValues(v => ({ ...v, stannington:0, council_st:0 }));
+    else              setValues(v => ({ ...v, stannington:850, council_st:159 }));
   };
 
-  // ── Income ──
-  const incomeItems = BASE.income;
-  const incomeTotal = incomeItems.reduce((sum, i) => {
-    return i.subtract ? sum - values[i.id] : sum + values[i.id];
-  }, 0);
-  const incomeBase = incomeItems.reduce((sum, i) => {
-    return i.subtract ? sum - i.value : sum + i.value;
-  }, 0);
+  /* ── Totals ── */
+  const incomeTotal = BASE.income.reduce((s,i) => i.subtract ? s - values[i.id] : s + values[i.id], 0);
+  const incomeBase  = BASE.income.reduce((s,i) => i.subtract ? s - i.value      : s + i.value,      0);
 
-  // ── Expense sums ──
-  const sharedTotal = BASE.shared.reduce((s, i) => s + values[i.id], 0);
-  const wayneTotal  = BASE.wayne.reduce((s, i) => s + values[i.id], 0);
-  const wifeTotal   = BASE.wife.reduce((s, i) => s + values[i.id], 0);
+  const sharedTotal = BASE.shared.reduce((s,i) => s + values[i.id], 0);
+  const wayneTotal  = BASE.wayne.reduce ((s,i) => s + values[i.id], 0);
+  const wifeTotal   = BASE.wife.reduce  ((s,i) => s + values[i.id], 0);
   const totalExp    = sharedTotal + wayneTotal + wifeTotal;
 
-  const sharedBase = BASE.shared.reduce((s, i) => s + i.value, 0);
-  const wayneBase  = BASE.wayne.reduce((s, i) => s + i.value, 0);
-  const wifeBase   = BASE.wife.reduce((s, i) => s + i.value, 0);
+  const sharedBase  = BASE.shared.reduce((s,i) => s + i.value, 0);
+  const wayneBase   = BASE.wayne.reduce ((s,i) => s + i.value, 0);
+  const wifeBase    = BASE.wife.reduce  ((s,i) => s + i.value, 0);
 
-  const remaining  = incomeTotal - totalExp;
-  const remainingBase = incomeBase - (sharedBase + wayneBase + wifeBase);
-  const remainingDiff = remaining - remainingBase;
-
-  const healthPct = Math.max(0, Math.min(100, (remaining / incomeTotal) * 100));
+  const remaining     = incomeTotal - totalExp;
+  const remainingBase = incomeBase  - (sharedBase + wayneBase + wifeBase);
+  const remainingDiff = remaining   - remainingBase;
 
   const chartData = [
-    { label:'Shared Household', value: sharedTotal, color:'#3b82f6' },
-    { label:"Husband",          value: wayneTotal,  color:'#22c55e' },
-    { label:"Wife",             value: wifeTotal,   color:'#a855f7' },
-    { label:"Savings/Buffer",   value: Math.max(0, remaining), color:'#f59e0b' },
+    { label:'Shared Household', value:sharedTotal,          color:'#3b82f6' },
+    { label:'Husband',          value:wayneTotal,            color:'#22c55e' },
+    { label:'Wife',             value:wifeTotal,             color:'#a855f7' },
+    { label:'Savings/Buffer',   value:Math.max(0,remaining), color:'#f59e0b' },
   ].filter(d => d.value > 0);
 
+  const summaryCards = [
+    { label:'Monthly Income',   value:incomeTotal, base:incomeBase,                    color:'#22c55e', icon:'💰' },
+    { label:'Total Expenses',   value:totalExp,    base:sharedBase+wayneBase+wifeBase, color:'#ef4444', icon:'💸' },
+    { label:'Shared Costs',     value:sharedTotal, base:sharedBase,                    color:'#3b82f6', icon:'🏠' },
+    { label:"Husband's Costs",  value:wayneTotal,  base:wayneBase,                     color:'#06b6d4', icon:'👨' },
+    { label:"Wife's Costs",     value:wifeTotal,   base:wifeBase,                      color:'#a855f7', icon:'👩' },
+    { label:'Monthly Surplus',  value:remaining,   base:remainingBase,                 color:remaining>=0?'#22c55e':'#ef4444', icon:remaining>=0?'✅':'⚠️' },
+  ];
+
   return (
-    <div style={{ maxWidth:1200, margin:'0 auto', padding:'16px' }}>
+    <div>
 
-      {/* Header */}
-      <div style={{ textAlign:'center', padding:'24px 0 16px' }}>
-        <h1 style={{ fontSize:24, fontWeight:800, color:'#f1f5f9', marginBottom:4 }}>
-          Monthly Budget Planner
-        </h1>
-        <p style={{ color:'#64748b', fontSize:14 }}>Husband & Wife — drag sliders to see how each change affects your monthly position</p>
-      </div>
-
-      {/* Scenario & Reset */}
-      <div style={{ display:'flex', justifyContent:'center', gap:8, marginBottom:20, flexWrap:'wrap' }}>
-        <ScenarioBadge label="Current (2-home period)" active={scenario==='current'} onClick={() => applyScenario('current')} />
-        <ScenarioBadge label="Post-Stannington (no rent)" active={scenario==='post'} onClick={() => applyScenario('post')} />
-        <button
-          onClick={handleReset}
-          style={{ padding:'6px 14px', borderRadius:999, fontSize:12, fontWeight:600, cursor:'pointer',
-            border:'1px solid #475569', background:'transparent', color:'#94a3b8' }}
-        >Reset All</button>
-      </div>
-
-      {/* Summary strip */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:12, marginBottom:20 }}>
-        {[
-          { label:'Monthly Income', value: incomeTotal, base: incomeBase, color:'#22c55e', icon:'💰' },
-          { label:'Total Expenses', value: totalExp, base: sharedBase+wayneBase+wifeBase, color:'#ef4444', icon:'💸' },
-          { label:'Shared Costs',   value: sharedTotal, base: sharedBase, color:'#3b82f6', icon:'🏠' },
-          { label:"Husband's Costs", value: wayneTotal,  base: wayneBase,  color:'#06b6d4', icon:'👨' },
-          { label:"Wife's Costs",   value: wifeTotal,   base: wifeBase,   color:'#a855f7', icon:'👩' },
-          { label:'Monthly Surplus',value: remaining,   base: remainingBase, color: remaining >= 0 ? '#22c55e' : '#ef4444', icon: remaining >= 0 ? '✅' : '⚠️' },
-        ].map(card => {
-          const d = card.value - card.base;
-          return (
-            <div key={card.label} style={{
-              background:'#1e293b', borderRadius:12, padding:'14px 16px',
-              border:`1px solid #334155`
-            }}>
-              <div style={{ fontSize:20, marginBottom:4 }}>{card.icon}</div>
-              <div style={{ fontSize:11, color:'#64748b', marginBottom:2 }}>{card.label}</div>
-              <div style={{ fontSize:22, fontWeight:800, color:card.color }}>
-                {card.value < 0 ? '−' : ''}£{Math.abs(card.value).toFixed(0)}
-              </div>
-              {d !== 0 && (
-                <div style={{ fontSize:11, color: d > 0 && card.label !== 'Monthly Surplus' ? '#ef4444' : '#22c55e', marginTop:2 }}>
-                  {d > 0 ? '▲ +' : '▼ '}£{Math.abs(d).toFixed(0)} vs baseline
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Main layout */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 300px', gap:16, alignItems:'start' }}>
-
-        {/* Left: sliders */}
-        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-
-          {/* Income */}
-          <div style={{ background:'#1e293b', borderRadius:12, overflow:'hidden', border:'1px solid #334155' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'14px 16px', background:'#052e16' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                <span style={{ fontSize:18 }}>💰</span>
-                <span style={{ fontWeight:700, fontSize:15 }}>Income</span>
-              </div>
-              <span style={{ fontWeight:800, fontSize:16, color:'#22c55e' }}>£{incomeTotal.toFixed(0)}/mo</span>
-            </div>
-            <div style={{ padding:'0 16px 8px' }}>
-              {incomeItems.map(item => (
-                <SliderItem
-                  key={item.id}
-                  item={item}
-                  value={values[item.id]}
-                  onChange={handleChange}
-                  accentColor="#22c55e"
-                />
-              ))}
-            </div>
+      {/* ── Sticky top bar (mobile only) ── */}
+      <div className="sticky-bar">
+        <div className="sticky-bar-item">
+          <div className="sb-label">Income</div>
+          <div className="sb-value" style={{ color:'#22c55e' }}>£{incomeTotal.toFixed(0)}</div>
+        </div>
+        <div style={{ color:'#334155', fontSize:20 }}>|</div>
+        <div className="sticky-bar-item">
+          <div className="sb-label">Expenses</div>
+          <div className="sb-value" style={{ color:'#ef4444' }}>£{totalExp.toFixed(0)}</div>
+        </div>
+        <div style={{ color:'#334155', fontSize:20 }}>|</div>
+        <div className="sticky-bar-item">
+          <div className="sb-label">Surplus</div>
+          <div className="sb-value" style={{ color: remaining >= 0 ? '#22c55e' : '#ef4444' }}>
+            {remaining < 0 ? '−' : ''}£{Math.abs(remaining).toFixed(0)}
           </div>
+        </div>
+      </div>
 
-          <Section title="Shared Household" icon="🏠" items={BASE.shared}
-            values={values} onChangeValues={handleChange}
-            color="blue" total={sharedTotal} baseTotal={sharedBase} />
+      {/* ── Page wrapper ── */}
+      <div style={{ maxWidth:1200, margin:'0 auto', padding:'16px' }}>
 
-          <Section title="Husband — Personal" icon="👨" items={BASE.wayne}
-            values={values} onChangeValues={handleChange}
-            color="green" total={wayneTotal} baseTotal={wayneBase} />
-
-          <Section title="Wife — Personal" icon="👩" items={BASE.wife}
-            values={values} onChangeValues={handleChange}
-            color="purple" total={wifeTotal} baseTotal={wifeBase} />
-
+        {/* Header */}
+        <div className="page-header" style={{ textAlign:'center', padding:'24px 0 16px' }}>
+          <h1 style={{ fontSize:24, fontWeight:800, color:'#f1f5f9', marginBottom:4 }}>
+            Monthly Budget Planner
+          </h1>
+          <p style={{ color:'#64748b', fontSize:13 }}>
+            Drag a slider <em>or</em> tap the £ amount to type — changes update totals instantly
+          </p>
         </div>
 
-        {/* Right: chart + summary */}
-        <div style={{ display:'flex', flexDirection:'column', gap:12, position:'sticky', top:16 }}>
+        {/* Scenario row */}
+        <div className="scenario-row">
+          <ScenBtn label="Current (2-home)" active={scenario==='current'} onClick={() => applyScenario('current')} />
+          <ScenBtn label="Post-Stannington" active={scenario==='post'}    onClick={() => applyScenario('post')} />
+          <button onClick={handleReset} className="scenario-btn" style={{
+            padding:'7px 14px', borderRadius:999, fontSize:12, fontWeight:600,
+            cursor:'pointer', border:'1px solid #475569', background:'transparent', color:'#94a3b8'
+          }}>Reset All</button>
+        </div>
 
-          {/* Donut */}
-          <div style={{ background:'#1e293b', borderRadius:12, padding:16, border:'1px solid #334155' }}>
-            <h3 style={{ fontSize:13, fontWeight:600, color:'#94a3b8', marginBottom:12, textAlign:'center' }}>Spending Breakdown</h3>
-            <DonutChart data={chartData} />
-            <div style={{ display:'flex', flexDirection:'column', gap:6, marginTop:12 }}>
-              {chartData.map(d => (
-                <div key={d.label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                    <div style={{ width:10, height:10, borderRadius:2, background:d.color, flexShrink:0 }} />
-                    <span style={{ fontSize:12, color:'#94a3b8' }}>{d.label}</span>
-                  </div>
-                  <span style={{ fontSize:12, fontWeight:600, color:'#e2e8f0' }}>£{d.value.toFixed(0)}</span>
+        {/* Summary cards */}
+        <div className="summary-cards">
+          {summaryCards.map(card => {
+            const d = card.value - card.base;
+            return (
+              <div key={card.label} className="summary-card" style={{
+                background:'#1e293b', borderRadius:12, padding:'12px 14px', border:'1px solid #334155'
+              }}>
+                <div className="card-icon" style={{ fontSize:18, marginBottom:3 }}>{card.icon}</div>
+                <div className="card-label" style={{ fontSize:11, color:'#64748b', marginBottom:2 }}>{card.label}</div>
+                <div className="card-value" style={{ fontSize:20, fontWeight:800, color:card.color }}>
+                  {card.value < 0 ? '−' : ''}£{Math.abs(card.value).toFixed(0)}
                 </div>
-              ))}
+                {d !== 0 && (
+                  <div style={{ fontSize:10, marginTop:2,
+                    color: d > 0 && card.label !== 'Monthly Surplus' ? '#ef4444' : '#22c55e' }}>
+                    {d > 0 ? '▲ +' : '▼ '}£{Math.abs(d).toFixed(0)}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Main grid: sliders left, sidebar right */}
+        <div className="main-grid">
+
+          {/* ── Left: all slider sections ── */}
+          <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+
+            {/* Income */}
+            <div style={{ background:'#1e293b', borderRadius:12, overflow:'hidden', border:'1px solid #334155' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center',
+                padding:'14px 16px', background:'#052e16' }}>
+                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                  <span style={{ fontSize:18 }}>💰</span>
+                  <span style={{ fontWeight:700, fontSize:15 }}>Income</span>
+                </div>
+                <span style={{ fontWeight:800, fontSize:16, color:'#22c55e' }}>£{incomeTotal.toFixed(0)}/mo</span>
+              </div>
+              <div style={{ padding:'0 16px 4px' }}>
+                {BASE.income.map(item => (
+                  <SliderItem key={item.id} item={item}
+                    value={values[item.id]} onChange={handleChange} accentColor="#22c55e" />
+                ))}
+              </div>
             </div>
+
+            <Section title="Shared Household" icon="🏠" items={BASE.shared}
+              values={values} onChangeValues={handleChange}
+              color="blue" total={sharedTotal} baseTotal={sharedBase} />
+
+            <Section title="Husband — Personal" icon="👨" items={BASE.wayne}
+              values={values} onChangeValues={handleChange}
+              color="green" total={wayneTotal} baseTotal={wayneBase} />
+
+            <Section title="Wife — Personal" icon="👩" items={BASE.wife}
+              values={values} onChangeValues={handleChange}
+              color="purple" total={wifeTotal} baseTotal={wifeBase} />
           </div>
 
-          {/* Budget health */}
-          <div style={{ background:'#1e293b', borderRadius:12, padding:16, border:'1px solid #334155' }}>
-            <h3 style={{ fontSize:13, fontWeight:600, color:'#94a3b8', marginBottom:14 }}>Budget Health</h3>
-            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-              <BarGauge label="Income used on expenses"
-                value={totalExp} max={incomeTotal}
-                color={totalExp/incomeTotal > 0.9 ? '#ef4444' : totalExp/incomeTotal > 0.75 ? '#f59e0b' : '#22c55e'}
-                subtitle={`${((totalExp/incomeTotal)*100).toFixed(0)}%`}
-              />
-              <BarGauge label="Monthly surplus"
-                value={Math.max(0, remaining)} max={incomeTotal}
-                color="#22c55e"
-                subtitle={`£${remaining.toFixed(0)}`}
-              />
-              <BarGauge label="Annual surplus (projected)"
-                value={Math.max(0, remaining*12)} max={incomeTotal*12}
-                color="#3b82f6"
-                subtitle={`£${(remaining*12).toFixed(0)}`}
-              />
-            </div>
-          </div>
+          {/* ── Sidebar / stacks below on mobile ── */}
+          <div className="sidebar">
 
-          {/* Surplus box */}
-          <div style={{
-            background: remaining >= 0 ? '#052e16' : '#1f0000',
-            borderRadius:12, padding:16,
-            border:`1px solid ${remaining >= 0 ? '#166534' : '#7f1d1d'}`
-          }}>
-            <div style={{ textAlign:'center' }}>
+            {/* Surplus headline */}
+            <div style={{
+              background: remaining >= 0 ? '#052e16' : '#1f0000', borderRadius:12, padding:18,
+              border:`1px solid ${remaining >= 0 ? '#166534' : '#7f1d1d'}`, textAlign:'center'
+            }}>
               <div style={{ fontSize:11, color:'#64748b', marginBottom:4 }}>Monthly Surplus / (Shortfall)</div>
-              <div style={{ fontSize:40, fontWeight:900, color: remaining >= 0 ? '#22c55e' : '#ef4444' }}>
+              <div style={{ fontSize:44, fontWeight:900, lineHeight:1,
+                color: remaining >= 0 ? '#22c55e' : '#ef4444' }}>
                 {remaining < 0 ? '−' : ''}£{Math.abs(remaining).toFixed(0)}
               </div>
               {remainingDiff !== 0 && (
-                <div style={{ fontSize:12, color: remainingDiff > 0 ? '#22c55e' : '#ef4444', marginTop:4 }}>
-                  {remainingDiff > 0 ? '▲ £' : '▼ −£'}{Math.abs(remainingDiff).toFixed(0)} vs baseline
+                <div style={{ fontSize:12, marginTop:6,
+                  color: remainingDiff > 0 ? '#22c55e' : '#ef4444' }}>
+                  {remainingDiff > 0 ? '▲ +£' : '▼ −£'}{Math.abs(remainingDiff).toFixed(0)} vs baseline
                 </div>
               )}
-              <div style={{ marginTop:12, paddingTop:12, borderTop:'1px solid #166534' }}>
-                <div style={{ fontSize:11, color:'#64748b', marginBottom:2 }}>Projected Annual Saving</div>
-                <div style={{ fontSize:22, fontWeight:700, color: remaining >= 0 ? '#4ade80' : '#f87171' }}>
+              <div style={{ marginTop:14, paddingTop:14,
+                borderTop:`1px solid ${remaining >= 0 ? '#166534' : '#7f1d1d'}` }}>
+                <div style={{ fontSize:11, color:'#64748b', marginBottom:3 }}>Projected Annual Saving</div>
+                <div style={{ fontSize:24, fontWeight:800,
+                  color: remaining >= 0 ? '#4ade80' : '#f87171' }}>
                   {remaining < 0 ? '−' : ''}£{Math.abs(remaining * 12).toFixed(0)}
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Quick tips */}
-          <div style={{ background:'#1e293b', borderRadius:12, padding:16, border:'1px solid #334155' }}>
-            <h3 style={{ fontSize:13, fontWeight:600, color:'#94a3b8', marginBottom:10 }}>Quick Scenarios</h3>
-            <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-              {[
-                { label:'Cut Amazon by £50', ids:{ w_amazon: Math.max(0, values.w_amazon - 50) } },
-                { label:'Cut eating out by £60', ids:{ w_cafes: Math.max(0, values.w_cafes - 60), f_restaurants: Math.max(0, values.f_restaurants - 40) } },
-                { label:'Pause AI subscriptions', ids:{ w_chatgpt:0, w_claude:0, w_google:0, w_ai:0 } },
-                { label:'Reduce groceries by £100', ids:{ groceries: Math.max(200, values.groceries - 100) } },
-              ].map(q => (
-                <button
-                  key={q.label}
-                  onClick={() => setValues(v => ({ ...v, ...q.ids }))}
-                  style={{
-                    textAlign:'left', padding:'8px 10px', borderRadius:8,
-                    background:'#0f172a', border:'1px solid #334155', color:'#cbd5e1',
-                    fontSize:12, cursor:'pointer', transition:'background 0.15s'
-                  }}
-                  onMouseEnter={e => e.target.style.background='#1e3a5f'}
-                  onMouseLeave={e => e.target.style.background='#0f172a'}
-                >{q.label}</button>
-              ))}
+            {/* Donut chart */}
+            <div style={{ background:'#1e293b', borderRadius:12, padding:16, border:'1px solid #334155' }}>
+              <h3 style={{ fontSize:13, fontWeight:600, color:'#94a3b8', marginBottom:12, textAlign:'center' }}>
+                Spending Breakdown
+              </h3>
+              <DonutChart data={chartData} />
+              <div style={{ display:'flex', flexDirection:'column', gap:7, marginTop:14 }}>
+                {chartData.map(d => (
+                  <div key={d.label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+                      <div style={{ width:10, height:10, borderRadius:2, background:d.color, flexShrink:0 }} />
+                      <span style={{ fontSize:12, color:'#94a3b8' }}>{d.label}</span>
+                    </div>
+                    <span style={{ fontSize:13, fontWeight:600, color:'#e2e8f0' }}>£{d.value.toFixed(0)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
+            {/* Budget health */}
+            <div style={{ background:'#1e293b', borderRadius:12, padding:16, border:'1px solid #334155' }}>
+              <h3 style={{ fontSize:13, fontWeight:600, color:'#94a3b8', marginBottom:14 }}>Budget Health</h3>
+              <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+                <BarGauge label="Income used on expenses"
+                  value={totalExp} max={incomeTotal}
+                  color={totalExp/incomeTotal > 0.9 ? '#ef4444' : totalExp/incomeTotal > 0.75 ? '#f59e0b' : '#22c55e'}
+                  subtitle={`${((totalExp/incomeTotal)*100).toFixed(0)}%`} />
+                <BarGauge label="Monthly surplus"
+                  value={Math.max(0,remaining)} max={incomeTotal}
+                  color="#22c55e" subtitle={`£${remaining.toFixed(0)}`} />
+                <BarGauge label="Annual surplus (projected)"
+                  value={Math.max(0,remaining*12)} max={incomeTotal*12}
+                  color="#3b82f6" subtitle={`£${(remaining*12).toFixed(0)}`} />
+              </div>
+            </div>
+
+            {/* Quick scenarios */}
+            <div style={{ background:'#1e293b', borderRadius:12, padding:16, border:'1px solid #334155' }}>
+              <h3 style={{ fontSize:13, fontWeight:600, color:'#94a3b8', marginBottom:10 }}>Quick Cuts</h3>
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                {[
+                  { label:'✂️  Cut Amazon by £50',       ids:{ w_amazon: Math.max(0, values.w_amazon - 50) } },
+                  { label:'✂️  Cut eating out by £60',    ids:{ w_cafes: Math.max(0, values.w_cafes-60), f_restaurants: Math.max(0,values.f_restaurants-40) } },
+                  { label:'⏸️  Pause AI subscriptions',   ids:{ w_chatgpt:0, w_claude:0, w_google:0, w_ai:0 } },
+                  { label:'✂️  Reduce groceries by £100', ids:{ groceries: Math.max(200, values.groceries-100) } },
+                ].map(q => (
+                  <button key={q.label}
+                    onClick={() => setValues(v => ({ ...v, ...q.ids }))}
+                    style={{ textAlign:'left', padding:'10px 12px', borderRadius:8,
+                      background:'#0f172a', border:'1px solid #334155', color:'#cbd5e1',
+                      fontSize:13, cursor:'pointer', WebkitTapHighlightColor:'transparent' }}
+                  >{q.label}</button>
+                ))}
+              </div>
+            </div>
+
+          </div>{/* /sidebar */}
+        </div>{/* /main-grid */}
+
+        <div style={{ textAlign:'center', padding:'28px 0 12px', color:'#334155', fontSize:11 }}>
+          Based on HSBC, Lloyds &amp; Monzo statements · Feb–Apr 2025
         </div>
-      </div>
-
-      <div style={{ textAlign:'center', padding:'24px 0 8px', color:'#334155', fontSize:11 }}>
-        Based on HSBC, Lloyds & Monzo statements · Feb–Apr 2025 · Drag any slider to model changes
       </div>
     </div>
   );
